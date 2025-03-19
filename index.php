@@ -26,10 +26,7 @@ function formatMatchDate($date_string)
     <nav class="navbar">
         <!-- Logo -->
         <div class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-play-circle"></i>
-            </div>
-            <div class="logo-text">Live<span>RW</span></div>
+            <img src="./assets/logo_without_bg.png" alt="Live.rw logo" height="40px" width="auto">
         </div>
 
         <!-- Navigation items -->
@@ -176,8 +173,8 @@ function formatMatchDate($date_string)
                     return strtotime($a['match_date']) - strtotime($b['match_date']);
                 });
 
-                // Get the first 3 upcoming matches
-                $display_matches = array_slice($upcoming_matches, 0, 3);
+                // Get the first 4 upcoming matches
+                $display_matches = array_slice($upcoming_matches, 0, 4);
 
                 foreach ($display_matches as $match):
                     // Parse the date
@@ -188,6 +185,9 @@ function formatMatchDate($date_string)
 
                     // Calculate if the match is within the next 24 hours
                     $is_soon = ($match_timestamp - time() < 86400); // 86400 seconds = 24 hours
+                
+                    // Get price information (with fallback)
+                    $price = isset($match['price']) ? $match['price'] : '9.99';
                     ?>
                     <div class="event-card">
                         <div class="event-time">
@@ -213,11 +213,11 @@ function formatMatchDate($date_string)
                         </div>
 
                         <div class="event-actions">
-                            <a href="watch.php?id=<?php echo $match['id']; ?>" class="btn-remind">
-                                <i class="<?php echo ($match['notify'] ? 'fas' : 'far'); ?> fa-bell"></i>
-                                <span>Remind Me</span>
+                            <a href="purchase.php?id=<?php echo $match['id']; ?>" class="btn-buy">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Buy Now $<?php echo $price; ?></span>
                             </a>
-                            <a href="watch.php?id=<?php echo $match['id']; ?>" class="btn-details">
+                            <a href="event.php?id=<?php echo $match['id']; ?>" class="btn-details">
                                 Details
                             </a>
                         </div>
@@ -225,8 +225,34 @@ function formatMatchDate($date_string)
                 <?php endforeach; ?>
             </div>
         </section>
-
     </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <div class="logo">
+                    <img src="assets/logo_without_bg.png" alt="LiveRW Logo" class="logo-image">
+                </div>
+                <p class="footer-tagline">Watch sports matches and highlights online in HD quality</p>
+            </div>
+
+            <div class="footer-nav">
+                <nav class="footer-links">
+                    <a href="browse.php">About Us</a>
+                    <a href="trending.php">Terms Of Use</a>
+                    <a href="top.php">Privacy Policy</a>
+                    <a href="matches.php">FAQ</a>
+                    <a href="tv-shows.php">Contact Us</a>
+                    <a href="https://x.com/ireberolive">X (Twitter)</a>
+                    <a href="https://www.instagram.com/ireberolive">Instagram</a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <?php echo date('Y'); ?> LiveRW. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

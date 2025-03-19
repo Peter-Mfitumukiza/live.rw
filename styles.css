@@ -887,7 +887,7 @@ body {
     background-color: #2a2a2a;
 }
 
-.btn-remind, .btn-details {
+.btn-buy, .btn-details {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -900,20 +900,19 @@ body {
     text-decoration: none;
 }
 
-.btn-remind {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #d1d1d1;
-    border: 1px solid #444444;
+.btn-buy {
+    background-color: #e53170; /* Reddish color for CTA */
+    color: white;
+    border: none;
 }
 
-.btn-remind i {
+.btn-buy i {
     margin-right: 8px;
 }
 
-.btn-remind:hover {
-    background-color: #1C6EA4; /* Blue from ESICIA logo */
-    color: white;
-    border-color: #1C6EA4;
+.btn-buy:hover {
+    background-color: #FFC700; /* Yellow from ESICIA logo */
+    color: #121212;
 }
 
 .btn-remind .fas {
@@ -981,7 +980,7 @@ body {
         flex-direction: row;
     }
     
-    .btn-remind, .btn-details {
+    .btn-buy, .btn-details {
         flex: 1;
     }
 }
@@ -1011,8 +1010,139 @@ body {
         padding: 10px;
     }
     
-    .btn-remind, .btn-details {
+    .btn-buy, .btn-details {
         padding: 8px 10px;
         font-size: 0.85rem;
+    }
+    
+    .btn-buy i {
+        margin-right: 4px;
+    }
+}
+
+/* FOOTER STYLES */
+.footer {
+    background-color: #0a0a0a;
+    padding: 40px 20px 20px;
+    margin-top: 40px;
+    border-top: 1px solid #222222;
+    text-align: center;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    margin-bottom: 20px;
+}
+
+.footer-logo .logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.logo-image {
+    height: 40px;
+    width: auto;
+    /* Add a slight glow effect to the logo */
+    filter: drop-shadow(0 0 5px rgba(255, 199, 0, 0.3));
+}
+
+.footer-tagline {
+    color: #808080;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.footer-nav {
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-links a {
+    color: #d1d1d1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.footer-links a:not(:last-child)::after {
+    content: '/';
+    position: absolute;
+    right: -12px;
+    color: #444444;
+}
+
+.footer-links a:hover {
+    color: #FFC700; /* Yellow from ESICIA logo */
+}
+
+.footer-bottom {
+    padding-top: 20px;
+    border-top: 1px solid #222222;
+    color: #808080;
+    font-size: 14px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .logo-image {
+        height: 35px;
+    }
+    
+    .footer-links {
+        gap: 15px 10px;
+    }
+    
+    .footer-links a {
+        font-size: 13px;
+    }
+    
+    .footer-links a:not(:last-child)::after {
+        right: -7px;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer {
+        padding: 30px 15px 15px;
+    }
+    
+    .logo-image {
+        height: 30px;
+    }
+    
+    .footer-tagline {
+        font-size: 13px;
+    }
+    
+    .footer-links {
+        gap: 10px 8px;
+    }
+    
+    .footer-links a {
+        font-size: 12px;
+    }
+    
+    .footer-links a:not(:last-child)::after {
+        right: -5px;
+    }
+    
+    .footer-bottom {
+        font-size: 12px;
     }
 }

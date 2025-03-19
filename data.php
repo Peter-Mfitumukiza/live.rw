@@ -316,8 +316,9 @@ $upcoming_matches = [
         ],
         'match_date' => '2025-03-21 18:00:00', // Format: YYYY-MM-DD HH:MM:SS
         'quality' => 'HD',
-        'notify' => true, // User has set a reminder
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/6c92a593991679.5e74e4ea45c4c.jpg'
+        'notify' => true,
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/6c92a593991679.5e74e4ea45c4c.jpg',
+        'price' => '9.99' // Added price information
     ],
     [
         'id' => 202,
@@ -328,8 +329,9 @@ $upcoming_matches = [
         ],
         'match_date' => '2025-03-22 22:00:00',
         'quality' => 'HD',
-        'notify' => false, // User hasn't set a reminder
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/02367c104454755.5f64738484fcf.jpg'
+        'notify' => false,
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/02367c104454755.5f64738484fcf.jpg',
+        'price' => '29.99' // UFC events typically cost more
     ],
     [
         'id' => 203,
@@ -341,7 +343,8 @@ $upcoming_matches = [
         'match_date' => date('Y-m-d H:i:s', strtotime('+3 hours')), // Today, 3 hours from now
         'quality' => 'HD',
         'notify' => true,
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/bfff3e93991679.5e74e4ea4379e.jpg'
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/bfff3e93991679.5e74e4ea4379e.jpg',
+        'price' => '12.99'
     ],
     [
         'id' => 204,
@@ -353,7 +356,8 @@ $upcoming_matches = [
         'match_date' => date('Y-m-d H:i:s', strtotime('+20 hours')), // Tomorrow
         'quality' => 'HD',
         'notify' => false,
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/0d6c5c54979277.5972d2a49cdbf.jpg'
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/0d6c5c54979277.5972d2a49cdbf.jpg',
+        'price' => '14.99'
     ],
     [
         'id' => 205,
@@ -365,7 +369,8 @@ $upcoming_matches = [
         'match_date' => date('Y-m-d H:i:s', strtotime('+2 days')), // In 2 days
         'quality' => 'HD',
         'notify' => true,
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/57ea5f104454755.5f64738485d29.jpg'
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/57ea5f104454755.5f64738485d29.jpg',
+        'price' => '9.99'
     ],
     [
         'id' => 206,
@@ -377,6 +382,7 @@ $upcoming_matches = [
         'match_date' => date('Y-m-d H:i:s', strtotime('+5 days')), // In 5 days
         'quality' => '4K',
         'notify' => false,
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/1f337f93991679.5e74e4ea44fec.jpg'
+        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/1f337f93991679.5e74e4ea44fec.jpg',
+        'price' => '14.99' // Premium price for 4K stream
     ]
 ];
