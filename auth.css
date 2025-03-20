@@ -1,0 +1,318 @@
+/* auth.css - Styles for authentication pages */
+
+/* Auth page specific styles */
+.auth-page {
+    background-color: #0a0a0a;
+    background-image: linear-gradient(to bottom, rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.95)), 
+                      url('https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/e76c3276329315.5c6755c8c5347.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Auth container */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 250px); /* Account for navbar and footer */
+    padding: 40px 20px;
+}
+
+/* Auth card */
+.auth-card {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 500px;
+    padding: 30px;
+}
+
+/* Auth header */
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.auth-header p {
+    color: #a0a0a0;
+    font-size: 16px;
+}
+
+/* Error and success messages */
+.error-message, .success-message {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.error-message {
+    background-color: rgba(229, 49, 112, 0.1);
+    border-left: 3px solid #e53170;
+    color: #e53170;
+}
+
+.success-message {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 3px solid #4CAF50;
+    color: #4CAF50;
+}
+
+.error-message i, .success-message i {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+/* Auth form */
+.auth-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666666;
+}
+
+.input-with-icon input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #333333;
+    border-radius: 5px;
+    background-color: #262626;
+    color: #ffffff;
+    font-size: 15px;
+    transition: all 0.3s;
+}
+
+.input-with-icon input:focus {
+    border-color: #1C6EA4;
+    background-color: #2a2a2a;
+    outline: none;
+}
+
+.input-with-icon input::placeholder {
+    color: #666666;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666666;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    color: #ffffff;
+}
+
+.password-requirements {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #a0a0a0;
+}
+
+/* Form options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.remember-me, .agree-terms {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input[type="checkbox"],
+.agree-terms input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #1C6EA4;
+}
+
+.remember-me label, .agree-terms label {
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.agree-terms label a {
+    color: #1C6EA4;
+    text-decoration: none;
+}
+
+.agree-terms label a:hover {
+    text-decoration: underline;
+}
+
+.forgot-password {
+    color: #1C6EA4;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Submit button */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background-color: #e53170;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.btn-submit:hover {
+    background-color: #FFC700;
+    color: #121212;
+}
+
+/* Social login */
+.social-login {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333333;
+}
+
+.social-login p {
+    color: #a0a0a0;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-social {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-google {
+    background-color: #DB4437;
+    color: #ffffff;
+}
+
+.btn-google:hover {
+    background-color: #c53929;
+}
+
+.btn-facebook {
+    background-color: #4267B2;
+    color: #ffffff;
+}
+
+.btn-facebook:hover {
+    background-color: #365899;
+}
+
+.btn-social i {
+    margin-right: 8px;
+}
+
+/* Auth footer */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333333;
+}
+
+.auth-footer p {
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.auth-footer a {
+    color: #1C6EA4;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Active auth link in navbar */
+.auth-buttons a.active {
+    background-color: #1C6EA4;
+    color: #ffffff;
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+    .auth-card {
+        padding: 20px;
+    }
+    
+    .auth-header h1 {
+        font-size: 24px;
+    }
+    
+    .auth-header p {
+        font-size: 14px;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .social-buttons {
+        flex-direction: column;
+    }
+}

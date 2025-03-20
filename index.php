@@ -1,4 +1,8 @@
 <?php
+
+// Start session for login tracking
+session_start();
+
 // Include the data file
 require_once('data.php');
 
@@ -17,6 +21,7 @@ function formatMatchDate($date_string)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiveRW - Live Match Streaming</title>
+    <link rel="icon" type="image/png" href="assets/favicon_2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -52,8 +57,14 @@ function formatMatchDate($date_string)
 
             <!-- Auth buttons -->
             <div class="auth-buttons">
-                <a href="#" class="sign-in">Sign in</a>
-                <a href="#" class="sign-up">Sign up</a>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="user-dropdown">
+                       
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="sign-in">Sign in</a>
+                    <a href="register.php" class="sign-up">Sign up</a>
+                <?php endif; ?>
             </div>
 
             <!-- Mobile menu toggle -->
@@ -77,7 +88,7 @@ function formatMatchDate($date_string)
                                     <h1 class="slide-title"><?php echo $match['title']; ?></h1>
                                     <p class="slide-description"><?php echo $match['description']; ?></p>
                                     <div class="slide-buttons">
-                                        <a href="watch.php?id=<?php echo $match['id']; ?>"
+                                        <a href="player.php?id=<?php echo $match['id']; ?>"
                                             class="btn btn-primary watch-now">
                                             <i class="fas fa-play"></i> Watch Now
                                         </a>
@@ -243,8 +254,8 @@ function formatMatchDate($date_string)
                     <a href="top.php">Privacy Policy</a>
                     <a href="matches.php">FAQ</a>
                     <a href="tv-shows.php">Contact Us</a>
-                    <a href="https://x.com/ireberolive">X (Twitter)</a>
-                    <a href="https://www.instagram.com/ireberolive">Instagram</a>
+                    <a href="https://x.com/livedotrw" target="_blank">X (Twitter)</a>
+                    <a href="https://www.instagram.com/livedotrw" target="_blank">Instagram</a>
                 </nav>
             </div>
         </div>
