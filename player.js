@@ -1,4 +1,3 @@
-// player.js - Video player functionality
 document.addEventListener('DOMContentLoaded', function () {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoWrapper = document.querySelector('.video-wrapper');
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const shareBtn = document.querySelector('.share-btn');
 
     // Hide native video controls
-    videoPlayer.controls = false;
+    // videoPlayer.controls = false;
 
     // Initialize player state
     let playerState = {

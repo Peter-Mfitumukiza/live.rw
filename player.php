@@ -1,40 +1,20 @@
 <?php
 // Include the data file
-require_once('data.php');
+// require_once('data.php');
+
+session_start();
+require_once('config/db.php');
+require_once('functions.php');
+
 
 // Get the video ID from URL parameter
-$videoId = isset($_GET['id']) ? intval($_GET['id']) : null;
-$isHighlight = isset($_GET['highlight']) ? true : false;
+$videoId = $eventId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
 // Find the requested video
 $videoData = null;
 
-if ($isHighlight && $videoId) {
-    // Find in highlights
-    foreach ($highlights as $highlight) {
-        if ($highlight['id'] == $videoId) {
-            $videoData = $highlight;
-            break;
-        }
-    }
-} elseif ($videoId) {
-    // Find in featured matches
-    foreach ($featured_matches as $match) {
-        if ($match['id'] == $videoId) {
-            $videoData = $match;
-            break;
-        }
-    }
-
-    // If not found in featured, check live matches
-    if (!$videoData) {
-        foreach ($live_matches as $match) {
-            if ($match['id'] == $videoId) {
-                $videoData = $match;
-                break;
-            }
-        }
-    }
+if ($videoId) {
+    $videoData = getEventById($db_mysql, $videoId);
 }
 
 // If video not found, redirect to homepage
@@ -49,6 +29,38 @@ function formatMatchDate($date_string)
     $date = new DateTime($date_string);
     return $date->format('M j, Y - g:i A');
 }
+
+// Get related content
+$relatedContent = getRelatedContent($db_mysql, $videoId);
+
+// Check if user is allowed to watch this event
+$isLoggedIn = isset($_SESSION['user_id']);
+$userId = $isLoggedIn ? $_SESSION['user_id'] : null;
+
+
+$isPaidEvent = $videoData['is_paid'];
+
+
+
+
+if ($isPaidEvent == true) {
+    if (!$isLoggedIn) {
+        header("Location: login.php");
+        exit;
+    }
+
+    // Check if the user has paid for the event
+    $paymentCheckQuery = $db_mysql->prepare("SELECT * FROM user_events WHERE user_id = ? AND event_id = ? AND payment_status = 'completed'");
+    $paymentCheckQuery->bind_param("ii", $userId, $eventId);
+    $paymentCheckQuery->execute();
+    $paymentResult = $paymentCheckQuery->get_result();
+
+    if ($paymentResult->num_rows === 0) {
+        header("Location: payment.php?event_id=$eventId"); // Redirect to payment
+        exit;
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -66,47 +78,7 @@ function formatMatchDate($date_string)
 
 <body class="player-page">
     <!-- Navbar -->
-    <nav class="navbar">
-        <!-- Logo -->
-        <div class="logo">
-            <a href="index.php">
-                <img src="./assets/logo_without_bg.png" alt="Live.rw logo" height="40px" width="auto">
-            </a>
-        </div>
-
-        <!-- Navigation items -->
-        <div class="nav-items">
-            <a href="index.php">Home</a>
-            <a href="#" class="active">Live</a>
-            <a href="#">Sports</a>
-            <a href="#">Schedule</a>
-            <a href="#">Teams</a>
-            <a href="#">Highlights</a>
-            <a href="#">Premium</a>
-        </div>
-
-        <!-- Right section - search and auth -->
-        <div class="nav-right">
-            <!-- Search bar -->
-            <div class="search-bar">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" placeholder="Search...">
-            </div>
-
-            <!-- Auth buttons -->
-            <div class="auth-buttons">
-                <a href="#" class="sign-in">Sign in</a>
-                <a href="#" class="sign-up">Sign up</a>
-            </div>
-
-            <!-- Mobile menu toggle -->
-            <div class="mobile-menu-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
+    <?php require_once 'views/navbar.php'; ?>
 
     <!-- Player content -->
     <div class="player-container">
@@ -123,12 +95,217 @@ function formatMatchDate($date_string)
             </div>
 
             <!-- Video player -->
-            <div class="video-wrapper">
-                <video id="videoPlayer" poster="<?php echo $videoData['image']; ?>" controls>
-                    <source src="assets/video.mp4" type="video/mp4">
+            <div class="vitdeo-wrapper">
+
+
+                <script type="text/javascript" src="https://live.rw/tt/site_assets/player/java/FWDEVPlayer.js"></script>
+
+
+                <div id="viavi_player" style="margin:auto;"></div>
+
+
+                <!-- Setup EVP -->
+                <script type="text/javascript">
+                    FWDEVPUtils.onReady(function () {
+
+                        FWDEVPlayer.videoStartBehaviour = "pause";
+
+                        new FWDEVPlayer({
+                            //main settings
+                            instanceName: "player1",
+                            parentId: "viavi_player",
+                            mainFolderPath: "https://live.rw/site_assets/player/content",
+                            initializeOnlyWhenVisible: "no",
+                            skinPath: "modern_skin_dark",
+                            displayType: "responsive",
+                            autoScale: "yes",
+                            fillEntireVideoScreen: "no",
+                            playsinline: "yes",
+                            useWithoutVideoScreen: "no",
+                            openDownloadLinkOnMobile: "no",
+                            googleAnalyticsMeasurementId: "",
+                            useVectorIcons: "no",
+                            useResumeOnPlay: "yes",
+                            goFullScreenOnButtonPlay: "no",
+                            useHEXColorsForSkin: "no",
+                            normalHEXButtonsColor: "#FF0000",
+                            privateVideoPassword: "428c841430ea18a70f7b06525d4b748a",
+                            startAtVideoSource: 0,
+                            startAtTime: "",
+                            stopAtTime: "",
+                            videoSource: [
+
+                                { source: "encrypt:aHR0cHM6Ly9jdXN0b21lci15aHFzaHVnY3llcGVibm16LmNsb3VkZmxhcmVzdHJlYW0uY29tL2ExOTRhODE1Yzk1OGRhOGUxZDZmYTExM2JlNjg5ZmMxL21hbmlmZXN0L3ZpZGVvLm0zdTg=", label: "" },
+
+
+                            ],
+                            posterPath: "https://live.rw/upload/uwanaa.jpg",
+                            showErrorInfo: "yes",
+                            fillEntireScreenWithPoster: "no",
+                            disableDoubleClickFullscreen: "no",
+                            useChromeless: "no",
+                            showPreloader: "yes",
+                            preloaderColors: ["#999999", "#FFFFFF"],
+                            addKeyboardSupport: "yes",
+                            autoPlay: "yes",
+                            autoPlayText: "Click to Unmute",
+                            loop: "yes",
+                            scrubAtTimeAtFirstPlay: "00:00:00",
+                            maxWidth: 1325,
+                            maxHeight: 535,
+                            volume: .8,
+                            greenScreenTolerance: 200,
+                            backgroundColor: "#000000",
+                            posterBackgroundColor: "#000000",
+                            //lightbox settings
+                            closeLightBoxWhenPlayComplete: "no",
+                            lightBoxBackgroundOpacity: .6,
+                            lightBoxBackgroundColor: "#000000",
+                            //logo settings
+                            logoSource: "https://live.rw/upload/falogo_without_bg.png",
+                            showLogo: "yes",
+                            hideLogoWithController: "yes",
+                            logoPosition: "topRight",
+                            logoLink: "#",
+                            logoMargins: 5,
+                            //controller settings
+                            showController: "yes",
+                            showDefaultControllerForVimeo: "yes",
+                            showScrubberWhenControllerIsHidden: "yes",
+                            showControllerWhenVideoIsStopped: "yes",
+                            showVolumeScrubber: "yes",
+                            showVolumeButton: "yes",
+                            showTime: "yes",
+                            showAudioTracksButton: "yes",
+                            showRewindButton: "yes",
+                            showQualityButton: "yes",
+                            showShareButton: "no",
+                            showEmbedButton: "no",
+                            showDownloadButton: "no",
+                            showMainScrubberToolTipLabel: "yes",
+                            showChromecastButton: "yes",
+                            how360DegreeVideoVrButton: "no",
+                            showFullScreenButton: "yes",
+                            repeatBackground: "no",
+                            controllerHeight: 43,
+                            controllerHideDelay: 3,
+                            startSpaceBetweenButtons: 11,
+                            spaceBetweenButtons: 11,
+                            mainScrubberOffestTop: 15,
+                            scrubbersOffsetWidth: 2,
+                            timeOffsetLeftWidth: 1,
+                            timeOffsetRightWidth: 2,
+                            volumeScrubberWidth: 80,
+                            volumeScrubberOffsetRightWidth: 0,
+                            timeColor: "#bdbdbd",
+                            showYoutubeRelAndInfo: "no",
+                            youtubeQualityButtonNormalColor: "#888888",
+                            youtubeQualityButtonSelectedColor: "#FFFFFF",
+                            scrubbersToolTipLabelBackgroundColor: "#FFFFFF",
+                            scrubbersToolTipLabelFontColor: "#5a5a5a",
+                            //redirect at video end
+                            redirectURL: "",
+                            redirectTarget: "_blank",
+                            //cuepoints
+                            executeCuepointsOnlyOnce: "no",
+                            cuepoints: [],
+                            //annotations
+                            annotiationsListId: "none",
+                            showAnnotationsPositionTool: "no",
+                            //subtitles
+                            showSubtitleButton: "yes",
+                            subtitlesOffLabel: "Subtitle off",
+                            startAtSubtitle: 1,
+                            subtitlesSource: [
+
+                            ],
+                            //audio visualizer
+                            audioVisualizerLinesColor: "#0099FF",
+                            audioVisualizerCircleColor: "#FFFFFF",
+                            //advertisement on pause window
+                            aopwTitle: "Advertisement",
+                            aopwSource: "",
+                            aopwWidth: 400,
+                            aopwHeight: 240,
+                            aopwBorderSize: 6,
+                            aopwTitleColor: "#FFFFFF",
+                            //playback rate / speed
+                            showPlaybackRateButton: "yes",
+                            defaultPlaybackRate: "1", //0.25, 0.5, 1, 1.25, 1.5, 2
+                            //sticky on scroll
+                            stickyOnScroll: "yes",
+                            stickyOnScrollShowOpener: "yes",
+                            stickyOnScrollWidth: "700",
+                            stickyOnScrollHeight: "394",
+                            //sticky display settings
+                            showOpener: "yes",
+                            showOpenerPlayPauseButton: "yes",
+                            verticalPosition: "bottom",
+                            horizontalPosition: "center",
+                            showPlayerByDefault: "yes",
+                            animatePlayer: "yes",
+                            openerAlignment: "right",
+                            mainBackgroundImagePath: "https://live.rw/site_assets/player/content/minimal_skin_dark/main-background.png",
+                            openerEqulizerOffsetTop: -1,
+                            openerEqulizerOffsetLeft: 3,
+                            offsetX: 0,
+                            offsetY: 0,
+
+                            //embed window
+                            embedWindowCloseButtonMargins: 15,
+                            borderColor: "#333333",
+                            mainLabelsColor: "#FFFFFF",
+                            secondaryLabelsColor: "#a1a1a1",
+                            shareAndEmbedTextColor: "#5a5a5a",
+                            inputBackgroundColor: "#000000",
+                            inputColor: "#FFFFFF",
+                            //a to b loop
+                            useAToB: "no",
+                            atbTimeBackgroundColor: "transparent",
+                            atbTimeTextColorNormal: "#FFFFFF",
+                            atbTimeTextColorSelected: "#FF0000",
+                            atbButtonTextNormalColor: "#888888",
+                            atbButtonTextSelectedColor: "#FFFFFF",
+                            atbButtonBackgroundNormalColor: "#FFFFFF",
+                            atbButtonBackgroundSelectedColor: "#000000",
+                            //thumbnails preview
+                            thumbnailsPreview: "auto",
+                            thumbnailsPreviewWidth: 196,
+                            thumbnailsPreviewHeight: 110,
+                            thumbnailsPreviewBackgroundColor: "#000000",
+                            thumbnailsPreviewBorderColor: "#666",
+                            thumbnailsPreviewLabelBackgroundColor: "#666",
+                            thumbnailsPreviewLabelFontColor: "#FFF",
+                            // context menu
+                            contextMenuType: 'default',
+                            showScriptDeveloper: "no",
+                            contextMenuBackgroundColor: "#1b1b1b",
+                            contextMenuBorderColor: "#1b1b1b",
+                            contextMenuSpacerColor: "#333",
+                            contextMenuItemNormalColor: "#bdbdbd",
+                            contextMenuItemSelectedColor: "#FFFFFF",
+                            contextMenuItemDisabledColor: "#333",
+                            useYoutube: "yes",
+                            useVimeo: "yes",
+
+
+                            //No Ad
+
+
+                        });
+
+                    });
+                </script>
+
+
+
+
+
+                <!--          <video id="videoPlayer" poster="<?php echo $videoData['image']; ?>">
+                    <source src="assets/video.mp4?>" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
-
+-->
                 <!-- Custom video controls will be positioned over the video -->
                 <div class="custom-controls">
                     <div class="control-bar">
@@ -161,7 +338,7 @@ function formatMatchDate($date_string)
 
                             <button class="quality-btn" aria-label="Quality">
                                 <i class="fas fa-cog"></i>
-                                <span>HD</span>
+                                <span><?php echo $videoData['quality'] ?? 'HD'; ?></span>
                             </button>
                             <div class="quality-menu">
                                 <div class="quality-option selected" data-quality="hd">HD</div>
@@ -174,7 +351,6 @@ function formatMatchDate($date_string)
                         </div>
                     </div>
 
-                    <!-- Big play button in center of video -->
                     <div class="big-play-btn">
                         <i class="fas fa-play"></i>
                     </div>
@@ -194,10 +370,16 @@ function formatMatchDate($date_string)
                         <div class="teams-container">
                             <div class="team home-team">
                                 <span class="team-name"><?php echo $videoData['teams']['home']; ?></span>
+                                <?php if (isset($videoData['teams']['home_score'])): ?>
+                                    <span class="team-score"><?php echo $videoData['teams']['home_score']; ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="versus">VS</div>
                             <div class="team away-team">
                                 <span class="team-name"><?php echo $videoData['teams']['away']; ?></span>
+                                <?php if (isset($videoData['teams']['away_score'])): ?>
+                                    <span class="team-score"><?php echo $videoData['teams']['away_score']; ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -222,7 +404,8 @@ function formatMatchDate($date_string)
                     <button class="action-btn share-btn">
                         <i class="fas fa-share-alt"></i> Share
                     </button>
-                    <button class="action-btn favorite-btn">
+                    <button class="action-btn favorite-btn" data-id="<?php echo $videoData['id']; ?>"
+                        data-type="<?php echo $isHighlight ? 'highlight' : 'event'; ?>">
                         <i class="far fa-heart"></i> Favorite
                     </button>
                     <button class="action-btn report-btn">
@@ -239,30 +422,31 @@ function formatMatchDate($date_string)
             <?php endif; ?>
         </div>
 
+
         <!-- Related videos sidebar -->
         <div class="related-videos">
             <h3>You might also like</h3>
             <div class="related-list">
-                <?php
-                // Get 5 random videos from highlights for related content
-                $related = array_slice($highlights, 0, 5);
-                foreach ($related as $video):
-                    ?>
-                    <a href="player.php?highlight=<?php echo $video['id']; ?>" class="related-item">
-                        <div class="related-thumbnail" style="background-image: url('<?php echo $video['image']; ?>');">
-                            <span class="duration"><?php echo $video['duration']; ?></span>
+                <?php foreach ($relatedContent as $content): ?>
+                    <a href="player.php?<?php echo $content['content_type'] === 'highlight' ? 'highlight=' : 'id='; ?><?php echo $content['id']; ?>"
+                        class="related-item">
+                        <div class="related-thumbnail" style="background-image: url('<?php echo $content['image']; ?>');">
+                            <?php if (isset($content['duration'])): ?>
+                                <span class="duration"><?php echo $content['duration']; ?></span>
+                            <?php endif; ?>
                         </div>
                         <div class="related-info">
-                            <h4><?php echo $video['title']; ?></h4>
+                            <h4><?php echo $content['title']; ?></h4>
                             <div class="related-meta">
-                                <span class="related-league"><?php echo $video['league']; ?></span>
-                                <span class="related-date"><?php echo $video['date']; ?></span>
+                                <span class="related-league"><?php echo $content['league'] ?? ''; ?></span>
+                                <span class="related-date"><?php echo $content['date']; ?></span>
                             </div>
                         </div>
                     </a>
                 <?php endforeach; ?>
             </div>
         </div>
+
     </div>
 
     <footer class="footer">

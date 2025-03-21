@@ -1,28 +1,24 @@
 <?php
-/**
- * LiveRW - Match Data
- * This file contains arrays of match data for different sections of the website
- */
 
 // Featured matches for the hero slideshow
-$featured_matches = [
-    [
-        'id' => 1,
-        'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/7077e43007319.560193cfa5ead.jpg',
-        'rating' => '4.8',
-        'year' => '2025',
-        'title' => 'UEFA Champions League',
-        'description' => 'Real Madrid vs Manchester City - Quarter Finals. The defending champions face off against the English giants in what promises to be a thrilling encounter at Santiago Bernabéu Stadium.',
-        'quality' => 'HD',
-        'category' => 'Live',
-        'match_date' => '2025-04-15 20:45:00',
-        'teams' => [
-            'home' => 'Real Madrid',
-            'away' => 'Manchester City'
-        ],
-        'league' => 'UEFA Champions League',
-        'stage' => 'Quarter Finals'
-    ],
+// $featured_matches = [
+//     [
+//         'id' => 1,
+//         'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/7077e43007319.560193cfa5ead.jpg',
+//         'rating' => '4.8',
+//         'year' => '2025',
+//         'title' => 'UEFA Champions League',
+//         'description' => 'Real Madrid vs Manchester City - Quarter Finals. The defending champions face off against the English giants in what promises to be a thrilling encounter at Santiago Bernabéu Stadium.',
+//         'quality' => 'HD',
+//         'category' => 'Live',
+//         'match_date' => '2025-04-15 20:45:00',
+//         'teams' => [
+//             'home' => 'Real Madrid',
+//             'away' => 'Manchester City'
+//         ],
+//         'league' => 'UEFA Champions League',
+//         'stage' => 'Quarter Finals'
+//     ],
     // [
     //     'id' => 2,
     //     'image' => 'https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/06c72b73932341.5c1aee5608337.jpg',
@@ -57,41 +53,41 @@ $featured_matches = [
     //     'league' => 'Formula 1',
     //     'stage' => 'Round 6'
     // ],
-    [
-        'id' => 4,
-        'image' => 'https://ichef.bbci.co.uk/images/ic/640x360/p0jbbdhc.jpg',
-        'rating' => '4.5',
-        'year' => '2025',
-        'title' => 'Wimbledon Finals',
-        'description' => 'Men\'s Singles Final. The two best players in the tournament face off on Centre Court for the prestigious Wimbledon title in this grand slam showdown.',
-        'quality' => 'HD',
-        'category' => 'Live',
-        'match_date' => '2025-07-13 14:00:00',
-        'teams' => [
-            'home' => 'Finalist 1',
-            'away' => 'Finalist 2'
-        ],
-        'league' => 'Tennis Grand Slam',
-        'stage' => 'Finals'
-    ],
-    [
-        'id' => 5,
-        'image' => 'https://images.indianexpress.com/2019/07/brazil-vs-argentina.jpg',
-        'rating' => '4.9',
-        'year' => '2025',
-        'title' => 'FIFA World Cup Qualifier',
-        'description' => 'Brazil vs Argentina - CONMEBOL Qualifiers. The South American giants clash in a crucial World Cup qualifier match that could determine their path to the tournament.',
-        'quality' => 'HD',
-        'category' => 'Upcoming',
-        'match_date' => '2025-06-05 19:00:00',
-        'teams' => [
-            'home' => 'Brazil',
-            'away' => 'Argentina'
-        ],
-        'league' => 'FIFA World Cup',
-        'stage' => 'Qualifiers'
-    ]
-];
+    // [
+    //     'id' => 4,
+    //     'image' => 'https://ichef.bbci.co.uk/images/ic/640x360/p0jbbdhc.jpg',
+    //     'rating' => '4.5',
+    //     'year' => '2025',
+    //     'title' => 'Wimbledon Finals',
+    //     'description' => 'Men\'s Singles Final. The two best players in the tournament face off on Centre Court for the prestigious Wimbledon title in this grand slam showdown.',
+    //     'quality' => 'HD',
+    //     'category' => 'Live',
+    //     'match_date' => '2025-07-13 14:00:00',
+    //     'teams' => [
+    //         'home' => 'Finalist 1',
+    //         'away' => 'Finalist 2'
+    //     ],
+    //     'league' => 'Tennis Grand Slam',
+    //     'stage' => 'Finals'
+    // ],
+    // [
+//         'id' => 5,
+//         'image' => 'https://images.indianexpress.com/2019/07/brazil-vs-argentina.jpg',
+//         'rating' => '4.9',
+//         'year' => '2025',
+//         'title' => 'FIFA World Cup Qualifier',
+//         'description' => 'Brazil vs Argentina - CONMEBOL Qualifiers. The South American giants clash in a crucial World Cup qualifier match that could determine their path to the tournament.',
+//         'quality' => 'HD',
+//         'category' => 'Upcoming',
+//         'match_date' => '2025-06-05 19:00:00',
+//         'teams' => [
+//             'home' => 'Brazil',
+//             'away' => 'Argentina'
+//         ],
+//         'league' => 'FIFA World Cup',
+//         'stage' => 'Qualifiers'
+//     ]
+// ];
 
 // Live matches currently streaming
 $live_matches = [

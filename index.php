@@ -1,17 +1,20 @@
 <?php
 
-// Start session for login tracking
 session_start();
 
 // Include the data file
-require_once('data.php');
-
-// Function to format match date
+require_once('functions.php');
+require_once('config/db.php');
 function formatMatchDate($date_string)
 {
     $date = new DateTime($date_string);
     return $date->format('M j, Y - g:i A');
 }
+
+$featured_matches = getFeaturedMatches($db_mysql);
+$highlights = getHighlights($db_mysql);
+$upcoming_matches = getUpcomingMatches($db_mysql);
+
 ?>
 
 <!DOCTYPE html>
@@ -28,51 +31,7 @@ function formatMatchDate($date_string)
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
-        <!-- Logo -->
-        <div class="logo">
-            <img src="./assets/logo_without_bg.png" alt="Live.rw logo" height="40px" width="auto">
-        </div>
-
-        <!-- Navigation items -->
-        <div class="nav-items">
-            <a href="#" class="active">Home</a>
-            <a href="#">Live</a>
-            <a href="#">Sports</a>
-            <a href="#">Schedule</a>
-            <a href="#">Teams</a>
-            <a href="#">Highlights</a>
-            <a href="#">Premium</a>
-        </div>
-
-        <!-- Right section - search and auth -->
-        <div class="nav-right">
-            <!-- Search bar -->
-            <div class="search-bar">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" placeholder="Search...">
-            </div>
-
-            <!-- Auth buttons -->
-            <div class="auth-buttons">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <div class="user-dropdown">
-                       
-                    </div>
-                <?php else: ?>
-                    <a href="login.php" class="sign-in">Sign in</a>
-                    <a href="register.php" class="sign-up">Sign up</a>
-                <?php endif; ?>
-            </div>
-
-            <!-- Mobile menu toggle -->
-            <div class="mobile-menu-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
+    <?php require_once 'views/navbar.php'; ?>
 
     <!-- Main content will go here -->
     <div class="main-content">
@@ -133,18 +92,13 @@ function formatMatchDate($date_string)
             </div>
 
             <div class="highlights-grid">
-                <?php
-                // Limit to 4 highlights for the homepage
-                $homepage_highlights = array_slice($highlights, 0, 4);
-                foreach ($homepage_highlights as $highlight):
-                    ?>
+                <?php foreach ($highlights as $highlight): ?>
                     <div class="highlight-card">
                         <div class="highlight-thumbnail"
                             style="background-image: url('<?php echo $highlight['image']; ?>');">
                             <div class="highlight-overlay">
-                                <!-- <span class="highlight-duration"><?php echo $highlight['duration']; ?></span> -->
-                                <!-- <span class="quality-badge"><?php echo $highlight['quality']; ?></span> -->
-                                <a href="watch.php?highlight=<?php echo $highlight['id']; ?>" class="play-button">
+                                <span class="highlight-duration"><?php echo $highlight['duration']; ?></span>
+                                <a href="<?php echo $highlight['video_url']; ?>" target="_blank" class="play-button">
                                     <i class="fas fa-play"></i>
                                 </a>
                             </div>
@@ -155,14 +109,6 @@ function formatMatchDate($date_string)
                                 <span class="league"><?php echo $highlight['league']; ?></span>
                                 <span class="date"><?php echo $highlight['date']; ?></span>
                             </div>
-                            <!-- <div class="highlight-stats">
-                                <div class="views">
-                                    <i class="fas fa-eye"></i> <?php echo $highlight['views']; ?>
-                                </div>
-                                <div class="likes">
-                                    <i class="fas fa-heart"></i> <?php echo $highlight['likes']; ?>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -178,7 +124,6 @@ function formatMatchDate($date_string)
 
             <div class="events-container">
                 <?php
-                // Assuming $upcoming_matches is defined in data.php
                 // Sort matches by date (closest first)
                 usort($upcoming_matches, function ($a, $b) {
                     return strtotime($a['match_date']) - strtotime($b['match_date']);
@@ -238,32 +183,8 @@ function formatMatchDate($date_string)
         </section>
     </div>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <div class="logo">
-                    <img src="assets/logo_without_bg.png" alt="LiveRW Logo" class="logo-image">
-                </div>
-                <p class="footer-tagline">Watch sports matches and highlights online in HD quality</p>
-            </div>
-
-            <div class="footer-nav">
-                <nav class="footer-links">
-                    <a href="browse.php">About Us</a>
-                    <a href="trending.php">Terms Of Use</a>
-                    <a href="top.php">Privacy Policy</a>
-                    <a href="matches.php">FAQ</a>
-                    <a href="tv-shows.php">Contact Us</a>
-                    <a href="https://x.com/livedotrw" target="_blank">X (Twitter)</a>
-                    <a href="https://www.instagram.com/livedotrw" target="_blank">Instagram</a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; <?php echo date('Y'); ?> LiveRW. All rights reserved.</p>
-        </div>
-    </footer>
+    <!-- Footer -->
+    <?php require_once 'views/footer.php'; ?>
 
     <script src="script.js"></script>
 </body>

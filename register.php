@@ -1,10 +1,10 @@
 <?php
-// Start session for login tracking
+
 session_start();
 
-// Check if user is already logged in
+require_once('config/db.php');
+
 if (isset($_SESSION['user_id'])) {
-    // Redirect to homepage if already logged in
     header('Location: index.php');
     exit;
 }
@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    
-    // Simple validation
+
     if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
         $error = 'Please fill in all fields';
     } elseif ($password !== $confirm_password) {
@@ -26,9 +25,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     } elseif (strlen($password) < 8) {
         $error = 'Password must be at least 8 characters long';
     } else {
-        // In a real implementation, you would save user data to a database
-        // Here we'll just show a success message
-        $success = 'Registration successful! You can now sign in.';
+        // Check if email already exists
+        $check_query = "SELECT id FROM users WHERE email = ?";
+        $stmt = mysqli_prepare($db_mysql, $check_query);
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+
+        if (mysqli_stmt_num_rows($stmt) > 0) {
+            $error = 'Email already exists. Please use a different email or try logging in.';
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+            // Insert user into database
+            $insert_query = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+            $stmt = mysqli_prepare($db_mysql, $insert_query);
+            mysqli_stmt_bind_param($stmt, "sss", $name, $email, $hashed_password);
+
+            if (mysqli_stmt_execute($stmt)) {
+                $user_id = mysqli_insert_id($db_mysql);
+
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['user_name'] = $name;
+                $_SESSION['user_email'] = $email;
+
+                header('Location: index.php');
+                exit;
+            } else {
+                $error = 'Registration failed. Please try again later.';
+            }
+        }
     }
 }
 ?>
@@ -47,47 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 
 <body class="auth-page">
     <!-- Navbar -->
-    <nav class="navbar">
-        <!-- Logo -->
-        <div class="logo">
-            <a href="index.php">
-                <img src="./assets/logo_without_bg.png" alt="Live.rw logo" height="40px" width="auto">
-            </a>
-        </div>
-
-        <!-- Navigation items -->
-        <div class="nav-items">
-            <a href="index.php">Home</a>
-            <a href="#">Live</a>
-            <a href="#">Sports</a>
-            <a href="#">Schedule</a>
-            <a href="#">Teams</a>
-            <a href="#">Highlights</a>
-            <a href="#">Premium</a>
-        </div>
-
-        <!-- Right section - search and auth -->
-        <div class="nav-right">
-            <!-- Search bar -->
-            <div class="search-bar">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" placeholder="Search...">
-            </div>
-
-            <!-- Auth buttons -->
-            <div class="auth-buttons">
-                <a href="login.php" class="sign-in">Sign in</a>
-                <a href="register.php" class="sign-up active">Sign up</a>
-            </div>
-
-            <!-- Mobile menu toggle -->
-            <div class="mobile-menu-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
+    <?php require_once 'views/navbar.php'; ?>
 
     <!-- Registration Form Container -->
     <div class="auth-container">
@@ -146,14 +132,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                     <label for="confirm_password">Confirm Password</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                        <input type="password" id="confirm_password" name="confirm_password"
+                            placeholder="Confirm your password" required>
                     </div>
                 </div>
 
                 <div class="form-options">
                     <div class="agree-terms">
                         <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy
+                                Policy</a></label>
                     </div>
                 </div>
 
@@ -210,10 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         // Toggle password visibility
         const toggleButtons = document.querySelectorAll('.toggle-password');
         toggleButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const passwordInput = this.parentElement.querySelector('input');
                 const icon = this.querySelector('i');
-                
+
                 if (passwordInput.type === 'password') {
                     passwordInput.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -229,12 +217,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         // Password strength validation
         const passwordInput = document.getElementById('password');
         const requirementsElement = document.querySelector('.password-requirements p');
-        
+
         if (passwordInput && requirementsElement) {
-            passwordInput.addEventListener('input', function() {
+            passwordInput.addEventListener('input', function () {
                 const password = this.value;
                 let requirementsMet = true;
-                
+
                 if (password.length < 8) {
                     requirementsElement.textContent = 'Password must be at least 8 characters long';
                     requirementsElement.style.color = '#e53170';
@@ -243,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                     requirementsElement.textContent = 'Password requirements met!';
                     requirementsElement.style.color = '#4CAF50';
                 }
-                
+
                 // You can add more password requirements here (uppercase, special chars, etc.)
             });
         }

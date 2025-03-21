@@ -197,7 +197,6 @@ function initializeReminders() {
                     showNotification('Reminder removed.');
                 }
                 
-                // Here you would make an AJAX call to update in database
                 console.log(`Toggled reminder for match ID: ${matchId}`);
             });
         });

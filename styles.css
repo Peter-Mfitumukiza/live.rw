@@ -167,6 +167,109 @@ body {
     min-height: calc(100vh - 70px); /* Subtract navbar height */
 }
 
+/* Complete rewrite of user dropdown styles */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #e53170;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.dropdown-content {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    width: 220px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+}
+
+.user-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.user-greeting {
+    font-weight: 500;
+    color: white;
+}
+
+.dropdown-body {
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: #d1d1d1;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #2a2a2a;
+    color: white;
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #333;
+    margin: 8px 0;
+}
+
+/* Let's add an animation to make it look nicer */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-content {
+    animation: fadeInUp 0.2s ease;
+}
+
 /* Responsive styles */
 @media (max-width: 1024px) {
     .nav-items {

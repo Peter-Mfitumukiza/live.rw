@@ -1,35 +1,62 @@
 <?php
-// Start session for login tracking
 session_start();
 
-// Check if user is already logged in
+require_once('config/db.php');
+
 if (isset($_SESSION['user_id'])) {
-    // Redirect to homepage if already logged in
     header('Location: index.php');
     exit;
 }
 
-// Handle login form submission
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
-    
-    // Simple validation
+    $remember = isset($_POST['remember']) ? true : false;
+
     if (empty($email) || empty($password)) {
         $error = 'Please fill in all fields';
     } else {
-        // In a real implementation, you would verify credentials against a database
-        // For demo purposes, we'll use a hardcoded check
-        if ($email === 'demo@liverw.com' && $password === 'password123') {
-            // Set session variables
-            $_SESSION['user_id'] = 1;
-            $_SESSION['user_name'] = 'Demo User';
-            $_SESSION['user_email'] = $email;
-            
-            // Redirect to homepage after successful login
-            header('Location: index.php');
-            exit;
+        $query = "SELECT id, name, email, password, status FROM users WHERE email = ?";
+        $stmt = mysqli_prepare($db_mysql, $query);
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($user = mysqli_fetch_assoc($result)) {
+            // Check if account is active
+            if ($user['status'] !== 'active') {
+                $error = 'Your account is not active. Please contact support.';
+            }
+            // Verify password
+            else if (password_verify($password, $user['password'])) {
+                // Set session variables
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_email'] = $user['email'];
+
+                // Update last login timestamp
+                $update_query = "UPDATE users SET last_login = NOW() WHERE id = ?";
+                $update_stmt = mysqli_prepare($db_mysql, $update_query);
+                mysqli_stmt_bind_param($update_stmt, "i", $user['id']);
+                mysqli_stmt_execute($update_stmt);
+
+                // Set remember me cookie if checked
+                if ($remember) {
+                    $token = bin2hex(random_bytes(32));
+                    $expires = time() + (30 * 24 * 60 * 60); // 30 days
+
+                    setcookie('remember_token', $token, $expires, '/');
+
+
+                }
+
+                // Redirect to homepage after successful login
+                header('Location: index.php');
+                exit;
+            } else {
+                $error = 'Invalid email or password';
+            }
         } else {
             $error = 'Invalid email or password';
         }
@@ -51,47 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
 <body class="auth-page">
     <!-- Navbar -->
-    <nav class="navbar">
-        <!-- Logo -->
-        <div class="logo">
-            <a href="index.php">
-                <img src="./assets/logo_without_bg.png" alt="Live.rw logo" height="40px" width="auto">
-            </a>
-        </div>
-
-        <!-- Navigation items -->
-        <div class="nav-items">
-            <a href="index.php">Home</a>
-            <a href="#">Live</a>
-            <a href="#">Sports</a>
-            <a href="#">Schedule</a>
-            <a href="#">Teams</a>
-            <a href="#">Highlights</a>
-            <a href="#">Premium</a>
-        </div>
-
-        <!-- Right section - search and auth -->
-        <div class="nav-right">
-            <!-- Search bar -->
-            <div class="search-bar">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" placeholder="Search...">
-            </div>
-
-            <!-- Auth buttons -->
-            <div class="auth-buttons">
-                <a href="login.php" class="sign-in active">Sign in</a>
-                <a href="register.php" class="sign-up">Sign up</a>
-            </div>
-
-            <!-- Mobile menu toggle -->
-            <div class="mobile-menu-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
+    <?php require_once 'views/navbar.php'; ?>
 
     <!-- Login Form Container -->
     <div class="auth-container">
@@ -187,10 +174,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     <script src="script.js"></script>
     <script>
         // Toggle password visibility
-        document.querySelector('.toggle-password').addEventListener('click', function() {
+        document.querySelector('.toggle-password').addEventListener('click', function () {
             const passwordInput = document.getElementById('password');
             const icon = this.querySelector('i');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.remove('fa-eye');
