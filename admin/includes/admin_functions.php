@@ -130,6 +130,17 @@ function getAllEvents($db, $page = 1, $limit = 10, $search = '')
     ];
 }
 
+function getAllSports($db)
+{
+    $query = "SELECT id, name FROM sports ORDER BY name ASC";
+    $result = mysqli_query($db, $query);
+    $sports = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $sports[] = $row;
+    }
+    return $sports;
+}
+
 // Function to get all highlights with pagination
 function getAllHighlights($db, $page = 1, $limit = 10, $search = '')
 {
@@ -208,13 +219,15 @@ function getEventById($db, $id)
         SELECT e.*, 
                l.name as league_name,
                home.name as home_team, home.id as home_team_id,
-               away.name as away_team, away.id as away_team_id
+               away.name as away_team, away.id as away_team_id,
+               s.name as sport_name
         FROM events e
         LEFT JOIN leagues l ON e.league_id = l.id
         LEFT JOIN event_teams et_home ON e.id = et_home.event_id AND et_home.is_home = 1
         LEFT JOIN event_teams et_away ON e.id = et_away.event_id AND et_away.is_home = 0
         LEFT JOIN teams home ON et_home.team_id = home.id
         LEFT JOIN teams away ON et_away.team_id = away.id
+        LEFT JOIN sports s ON e.sport_id = s.id
         WHERE e.id = ?
     ";
 
@@ -262,8 +275,8 @@ function createEvent($db, $data)
         // Insert into events table
         $query = "
             INSERT INTO events (title, description, image, category, quality, match_date, stage, 
-                               status, is_paid, price, league_id, stream_url, featured)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                               status, is_paid, price, league_id, stream_url, featured, sport_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ";
 
         $stmt = mysqli_prepare($db, $query);
@@ -273,7 +286,7 @@ function createEvent($db, $data)
 
         mysqli_stmt_bind_param(
             $stmt,
-            "ssssssssiidsi",
+            "ssssssssiidsii",
             $data['title'],
             $data['description'],
             $data['image'],
@@ -286,7 +299,8 @@ function createEvent($db, $data)
             $data['price'],
             $data['league_id'],
             $data['stream_url'],
-            $featured
+            $featured,
+            $data['sport_id']
         );
 
         mysqli_stmt_execute($stmt);
@@ -341,7 +355,8 @@ function updateEvent($db, $id, $data)
                 price = ?,
                 league_id = ?,
                 stream_url = ?,
-                featured = ?
+                featured = ?,
+                sport_id = ?
             WHERE id = ?
         ";
 
@@ -352,7 +367,7 @@ function updateEvent($db, $id, $data)
 
         mysqli_stmt_bind_param(
             $stmt,
-            "ssssssssiidsii",
+            "ssssssssiidsiii",
             $data['title'],
             $data['description'],
             $data['image'],
@@ -366,6 +381,7 @@ function updateEvent($db, $id, $data)
             $data['league_id'],
             $data['stream_url'],
             $featured,
+            $data['sport_id'],
             $id
         );
 

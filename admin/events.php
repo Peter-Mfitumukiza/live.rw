@@ -92,7 +92,7 @@ $eventsData = getAllEvents($db_mysql, $page, 10, $search);
                                     <tr>
                                         <td><?php echo $event['id']; ?></td>
                                         <td>
-                                            <img src="<?php echo $event['image']; ?>" alt="<?php echo $event['title']; ?>"
+                                            <img src="../<?php echo $event['image']; ?>" alt="<?php echo $event['title']; ?>"
                                                 class="table-img">
                                         </td>
                                         <td>

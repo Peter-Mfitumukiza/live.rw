@@ -92,7 +92,7 @@ $highlightsData = getAllHighlights($db_mysql, $page, 10, $search);
                                     <tr>
                                         <td><?php echo $highlight['id']; ?></td>
                                         <td>
-                                            <img src="<?php echo $highlight['image']; ?>"
+                                            <img src="../<?php echo $highlight['image']; ?>"
                                                 alt="<?php echo $highlight['title']; ?>" class="table-img">
                                         </td>
                                         <td><?php echo $highlight['title']; ?></td>

@@ -1,11 +1,8 @@
 <?php
 // Include the data file
-// require_once('data.php');
-
 session_start();
 require_once('config/db.php');
 require_once('functions.php');
-
 
 // Get the video ID from URL parameter
 $videoId = $eventId = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -36,12 +33,7 @@ $relatedContent = getRelatedContent($db_mysql, $videoId);
 // Check if user is allowed to watch this event
 $isLoggedIn = isset($_SESSION['user_id']);
 $userId = $isLoggedIn ? $_SESSION['user_id'] : null;
-
-
 $isPaidEvent = $videoData['is_paid'];
-
-
-
 
 if ($isPaidEvent == true) {
     if (!$isLoggedIn) {
@@ -61,6 +53,11 @@ if ($isPaidEvent == true) {
     }
 }
 
+// Get stream URL from database or use a default if not available
+$streamUrl = !empty($videoData['stream_url']) ? $videoData['stream_url'] : '';
+// Encrypt the stream URL for FWDEVPlayer if needed
+// $encryptedStreamUrl = !empty($streamUrl) ? $streamUrl : 'https://customer-yhqshugcyepebnmz.cloudflarestream.com/a194a815c958da8e1d6fa113be689fc1/manifest/video.m3u8';
+
 ?>
 
 <!DOCTYPE html>
@@ -74,6 +71,78 @@ if ($isPaidEvent == true) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="player.css">
+    <style>
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top: 5px solid #1C6EA4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .video-wrapper {
+            position: relative;
+            aspect-ratio: 16/9;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: #e53170;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+
+            100% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+    </style>
 </head>
 
 <body class="player-page">
@@ -95,26 +164,30 @@ if ($isPaidEvent == true) {
             </div>
 
             <!-- Video player -->
-            <div class="vitdeo-wrapper">
+            <div class="video-wrapper">
+                <!-- Loading indicator -->
+                <div class="loading-indicator"></div>
 
+                <!-- <?php if (isset($videoData['category']) && $videoData['category'] === 'Live'): ?>
+                    <div class="live-badge">
+                        <span class="pulse-dot"></span> LIVE
+                    </div>
+                <?php endif; ?> -->
 
+                <!-- FWDEVPlayer -->
                 <script type="text/javascript" src="https://live.rw/tt/site_assets/player/java/FWDEVPlayer.js"></script>
-
-
                 <div id="viavi_player" style="margin:auto;"></div>
-
 
                 <!-- Setup EVP -->
                 <script type="text/javascript">
                     FWDEVPUtils.onReady(function () {
-
                         FWDEVPlayer.videoStartBehaviour = "pause";
 
                         new FWDEVPlayer({
                             //main settings
                             instanceName: "player1",
                             parentId: "viavi_player",
-                            mainFolderPath: "https://live.rw/site_assets/player/content",
+                            mainFolderPath: "https://live.rw/tt/site_assets/player/content",
                             initializeOnlyWhenVisible: "no",
                             skinPath: "modern_skin_dark",
                             displayType: "responsive",
@@ -134,12 +207,9 @@ if ($isPaidEvent == true) {
                             startAtTime: "",
                             stopAtTime: "",
                             videoSource: [
-
-                                { source: "encrypt:aHR0cHM6Ly9jdXN0b21lci15aHFzaHVnY3llcGVibm16LmNsb3VkZmxhcmVzdHJlYW0uY29tL2ExOTRhODE1Yzk1OGRhOGUxZDZmYTExM2JlNjg5ZmMxL21hbmlmZXN0L3ZpZGVvLm0zdTg=", label: "" },
-
-
+                                { source: "<?php echo $streamUrl; ?>", label: "" }
                             ],
-                            posterPath: "https://live.rw/upload/uwanaa.jpg",
+                            posterPath: "<?php echo $videoData['image']; ?>",
                             showErrorInfo: "yes",
                             fillEntireScreenWithPoster: "no",
                             disableDoubleClickFullscreen: "no",
@@ -149,7 +219,7 @@ if ($isPaidEvent == true) {
                             addKeyboardSupport: "yes",
                             autoPlay: "yes",
                             autoPlayText: "Click to Unmute",
-                            loop: "yes",
+                            loop: "no",
                             scrubAtTimeAtFirstPlay: "00:00:00",
                             maxWidth: 1325,
                             maxHeight: 535,
@@ -162,7 +232,7 @@ if ($isPaidEvent == true) {
                             lightBoxBackgroundOpacity: .6,
                             lightBoxBackgroundColor: "#000000",
                             //logo settings
-                            logoSource: "https://live.rw/upload/falogo_without_bg.png",
+                            logoSource: "../assets/logo_without_bg.png",
                             showLogo: "yes",
                             hideLogoWithController: "yes",
                             logoPosition: "topRight",
@@ -216,9 +286,7 @@ if ($isPaidEvent == true) {
                             showSubtitleButton: "yes",
                             subtitlesOffLabel: "Subtitle off",
                             startAtSubtitle: 1,
-                            subtitlesSource: [
-
-                            ],
+                            subtitlesSource: [],
                             //audio visualizer
                             audioVisualizerLinesColor: "#0099FF",
                             audioVisualizerCircleColor: "#FFFFFF",
@@ -250,7 +318,6 @@ if ($isPaidEvent == true) {
                             openerEqulizerOffsetLeft: 3,
                             offsetX: 0,
                             offsetY: 0,
-
                             //embed window
                             embedWindowCloseButtonMargins: 15,
                             borderColor: "#333333",
@@ -286,81 +353,13 @@ if ($isPaidEvent == true) {
                             contextMenuItemSelectedColor: "#FFFFFF",
                             contextMenuItemDisabledColor: "#333",
                             useYoutube: "yes",
-                            useVimeo: "yes",
-
-
-                            //No Ad
-
-
+                            useVimeo: "yes"
                         });
 
+                        // Hide loading indicator when player is ready
+                        document.querySelector('.loading-indicator').style.display = 'none';
                     });
                 </script>
-
-
-
-
-
-                <!--          <video id="videoPlayer" poster="<?php echo $videoData['image']; ?>">
-                    <source src="assets/video.mp4?>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
--->
-                <!-- Custom video controls will be positioned over the video -->
-                <div class="custom-controls">
-                    <div class="control-bar">
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                                <div class="progress-marker"></div>
-                            </div>
-                            <div class="time-display">
-                                <span class="current-time">00:00</span>
-                                <span class="duration">00:00</span>
-                            </div>
-                        </div>
-
-                        <div class="control-buttons">
-                            <button class="play-btn" aria-label="Play">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="pause-btn" aria-label="Pause" style="display: none;">
-                                <i class="fas fa-pause"></i>
-                            </button>
-                            <button class="volume-btn" aria-label="Volume">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                            <div class="volume-slider">
-                                <input type="range" min="0" max="1" step="0.05" value="1">
-                            </div>
-
-                            <div class="spacer"></div>
-
-                            <button class="quality-btn" aria-label="Quality">
-                                <i class="fas fa-cog"></i>
-                                <span><?php echo $videoData['quality'] ?? 'HD'; ?></span>
-                            </button>
-                            <div class="quality-menu">
-                                <div class="quality-option selected" data-quality="hd">HD</div>
-                                <div class="quality-option" data-quality="sd">SD</div>
-                                <div class="quality-option" data-quality="auto">Auto</div>
-                            </div>
-                            <button class="fullscreen-btn" aria-label="Fullscreen">
-                                <i class="fas fa-expand"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="big-play-btn">
-                        <i class="fas fa-play"></i>
-                    </div>
-                </div>
-
-                <?php if (isset($videoData['category']) && $videoData['category'] === 'Live'): ?>
-                    <div class="live-badge">
-                        <span class="pulse-dot"></span> LIVE
-                    </div>
-                <?php endif; ?>
             </div>
 
             <!-- Video details -->
@@ -401,14 +400,14 @@ if ($isPaidEvent == true) {
                 </div>
 
                 <div class="video-actions">
-                    <button class="action-btn share-btn">
+                    <button class="action-btn share-btn" id="shareBtn">
                         <i class="fas fa-share-alt"></i> Share
                     </button>
-                    <button class="action-btn favorite-btn" data-id="<?php echo $videoData['id']; ?>"
-                        data-type="<?php echo $isHighlight ? 'highlight' : 'event'; ?>">
+                    <button class="action-btn favorite-btn" id="favoriteBtn" data-id="<?php echo $videoData['id']; ?>"
+                        data-type="event">
                         <i class="far fa-heart"></i> Favorite
                     </button>
-                    <button class="action-btn report-btn">
+                    <button class="action-btn report-btn" id="reportBtn">
                         <i class="fas fa-flag"></i> Report
                     </button>
                 </div>
@@ -421,7 +420,6 @@ if ($isPaidEvent == true) {
                 </div>
             <?php endif; ?>
         </div>
-
 
         <!-- Related videos sidebar -->
         <div class="related-videos">
@@ -446,38 +444,46 @@ if ($isPaidEvent == true) {
                 <?php endforeach; ?>
             </div>
         </div>
-
     </div>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <div class="logo">
-                    <img src="assets/logo_without_bg.png" alt="LiveRW Logo" class="logo-image">
-                </div>
-                <p class="footer-tagline">Watch sports matches and highlights online in HD quality</p>
-            </div>
-
-            <div class="footer-nav">
-                <nav class="footer-links">
-                    <a href="browse.php">About Us</a>
-                    <a href="trending.php">Terms Of Use</a>
-                    <a href="top.php">Privacy Policy</a>
-                    <a href="matches.php">FAQ</a>
-                    <a href="tv-shows.php">Contact Us</a>
-                    <a href="https://x.com/livedotrw">X (Twitter)</a>
-                    <a href="https://www.instagram.com/livedotrw">Instagram</a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; <?php echo date('Y'); ?> LiveRW. All rights reserved.</p>
-        </div>
-    </footer>
+    <!-- Footer -->
+    <?php require_once 'views/footer.php'; ?>
 
     <script src="script.js"></script>
-    <script src="player.js"></script>
+    <script>
+        // Simple sharing functionality
+        document.getElementById('shareBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    alert('Link copied to clipboard');
+                })
+                .catch(() => {
+                    alert('Failed to copy link');
+                });
+        });
+
+        // Simple favorite functionality
+        document.getElementById('favoriteBtn').addEventListener('click', function () {
+            const icon = this.querySelector('i');
+
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                this.classList.add('active');
+                alert('Added to favorites');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                this.classList.remove('active');
+                alert('Removed from favorites');
+            }
+        });
+
+        // Simple report functionality
+        document.getElementById('reportBtn').addEventListener('click', function () {
+            alert('Thank you for reporting this content. Our team will review it.');
+        });
+    </script>
 </body>
 
 </html>
