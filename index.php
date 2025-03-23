@@ -143,7 +143,7 @@ $upcoming_matches = getUpcomingMatches($db_mysql);
                     $is_soon = ($match_timestamp - time() < 86400); // 86400 seconds = 24 hours
                 
                     // Get price information (with fallback)
-                    $price = isset($match['price']) ? $match['price'] : '9.99';
+                    $price = isset($match['price']) ? $match['price'] : '1000';
                     ?>
                     <div class="event-card">
                         <div class="event-time">
@@ -171,7 +171,7 @@ $upcoming_matches = getUpcomingMatches($db_mysql);
                         <div class="event-actions">
                             <a href="purchase.php?id=<?php echo $match['id']; ?>" class="btn-buy">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span>Buy Now $<?php echo $price; ?></span>
+                                <span>Buy Now <?php echo $price; ?> Frw</span>
                             </a>
                             <a href="event.php?id=<?php echo $match['id']; ?>" class="btn-details">
                                 Details

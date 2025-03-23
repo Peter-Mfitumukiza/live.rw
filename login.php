@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     if (empty($email) || empty($password)) {
         $error = 'Please fill in all fields';
     } else {
-        $query = "SELECT id, name, email, password, status FROM users WHERE email = ?";
+        $query = "SELECT id, name, email, role, password, status FROM users WHERE email = ?";
         $stmt = mysqli_prepare($db_mysql, $query);
         mysqli_stmt_bind_param($stmt, "s", $email);
         mysqli_stmt_execute($stmt);
@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_role'] = $user['role'];
 
                 // Update last login timestamp
                 $update_query = "UPDATE users SET last_login = NOW() WHERE id = ?";
@@ -47,8 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                     $expires = time() + (30 * 24 * 60 * 60); // 30 days
 
                     setcookie('remember_token', $token, $expires, '/');
+                }
 
-
+                if ($user['role'] === 'admin') {
+                    header('Location: admin/index.php');
+                    exit;
                 }
 
                 // Redirect to homepage after successful login
