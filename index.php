@@ -183,6 +183,13 @@ $upcoming_matches = getUpcomingMatches($db_mysql);
         </section>
     </div>
 
+    <!-- Banner ads before the footer -->
+
+    <?php
+    $ad_position = 'banner';
+    include('./ads.php');
+    ?>
+
     <!-- Footer -->
     <?php require_once 'views/footer.php'; ?>
 

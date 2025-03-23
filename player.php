@@ -443,6 +443,11 @@ $streamUrl = !empty($videoData['stream_url']) ? $videoData['stream_url'] : '';
                     </a>
                 <?php endforeach; ?>
             </div>
+            <!-- Adds -->
+            <?php
+            $ad_position = 'sidebar';
+            include('./ads.php');
+            ?>
         </div>
     </div>
 
