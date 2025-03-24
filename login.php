@@ -10,16 +10,24 @@ if (isset($_SESSION['user_id'])) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    $email = trim($_POST['email']);
+    $login_id = trim($_POST['login_id']);
     $password = $_POST['password'];
     $remember = isset($_POST['remember']) ? true : false;
 
-    if (empty($email) || empty($password)) {
+    if (empty($login_id) || empty($password)) {
         $error = 'Please fill in all fields';
     } else {
-        $query = "SELECT id, name, email, role, password, status FROM users WHERE email = ?";
+        // Determine if login_id is an email or phone number
+        $is_email = filter_var($login_id, FILTER_VALIDATE_EMAIL);
+
+        if ($is_email) {
+            $query = "SELECT id, name, email, phone, role, password, status FROM users WHERE email = ?";
+        } else {
+            $query = "SELECT id, name, email, phone, role, password, status FROM users WHERE phone = ?";
+        }
+
         $stmt = mysqli_prepare($db_mysql, $query);
-        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_bind_param($stmt, "s", $login_id);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
@@ -34,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_phone'] = $user['phone'];
                 $_SESSION['user_role'] = $user['role'];
 
                 // Update last login timestamp
@@ -59,10 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 header('Location: index.php');
                 exit;
             } else {
-                $error = 'Invalid email or password';
+                $error = 'Invalid credentials';
             }
         } else {
-            $error = 'Invalid email or password';
+            $error = 'Invalid credentials';
         }
     }
 }
@@ -75,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - LiveRW</title>
+    <link rel="icon" type="image/png" href="assets/favicon_2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
@@ -101,10 +111,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
             <form class="auth-form" method="post" action="login.php">
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="login_id">Email or Phone</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="login_id" name="login_id" placeholder="Enter your email or phone"
+                            required>
                     </div>
                 </div>
 

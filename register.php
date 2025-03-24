@@ -15,10 +15,11 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+    if (empty($name) || empty($email) || empty($phone) || empty($password) || empty($confirm_password)) {
         $error = 'Please fill in all fields';
     } elseif ($password !== $confirm_password) {
         $error = 'Passwords do not match';
@@ -26,21 +27,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         $error = 'Password must be at least 8 characters long';
     } else {
         // Check if email already exists
-        $check_query = "SELECT id FROM users WHERE email = ?";
+        $check_query = "SELECT id FROM users WHERE email = ? OR phone = ?";
         $stmt = mysqli_prepare($db_mysql, $check_query);
-        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_bind_param($stmt, "ss", $email, $phone);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
 
         if (mysqli_stmt_num_rows($stmt) > 0) {
-            $error = 'Email already exists. Please use a different email or try logging in.';
+            $error = 'Email or phone number already exists. Please use different credentials or try logging in.';
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             // Insert user into database
-            $insert_query = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+            $insert_query = "INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)";
             $stmt = mysqli_prepare($db_mysql, $insert_query);
-            mysqli_stmt_bind_param($stmt, "sss", $name, $email, $hashed_password);
+            mysqli_stmt_bind_param($stmt, "ssss", $name, $email, $phone, $hashed_password);
 
             if (mysqli_stmt_execute($stmt)) {
                 $user_id = mysqli_insert_id($db_mysql);
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                 $_SESSION['user_id'] = $user_id;
                 $_SESSION['user_name'] = $name;
                 $_SESSION['user_email'] = $email;
+                $_SESSION['user_phone'] = $phone;
 
                 header('Location: index.php');
                 exit;
@@ -66,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - LiveRW</title>
+    <link rel="icon" type="image/png" href="assets/favicon_2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
@@ -111,6 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                     <div class="input-with-icon">
                         <i class="fas fa-envelope"></i>
                         <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
                     </div>
                 </div>
 
