@@ -1,7 +1,9 @@
 <?php
+
 session_start();
 
 require_once('config/db.php');
+require_once('functions.php'); // Include the device management functions
 
 if (isset($_SESSION['user_id'])) {
     header('Location: index.php');
@@ -38,12 +40,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             }
             // Verify password
             else if (password_verify($password, $user['password'])) {
+                // Check device limit before login
+                $deviceResult = registerDeviceLogin($db_mysql, $user['id']);
+
+                if (!$deviceResult['success'] && isset($deviceResult['limit_reached'])) {
+                    // User has reached device limit, show device management page
+                    $_SESSION['temp_user_id'] = $user['id']; // Temporary session just for device management
+                    $_SESSION['temp_user_name'] = $user['name'];
+                    header('Location: manage_devices.php');
+                    exit;
+                }
+
                 // Set session variables
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['user_phone'] = $user['phone'];
                 $_SESSION['user_role'] = $user['role'];
+                $_SESSION['device_id'] = $deviceResult['device_id']; // Store the device ID
 
                 // Update last login timestamp
                 $update_query = "UPDATE users SET last_login = NOW() WHERE id = ?";
@@ -139,18 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 </div>
 
                 <button type="submit" name="login" class="btn-submit">Sign In</button>
-
-                <!-- <div class="social-login">
-                    <p>Or sign in with</p>
-                    <div class="social-buttons">
-                        <button type="button" class="btn-social btn-google">
-                            <i class="fab fa-google"></i> Google
-                        </button>
-                        <button type="button" class="btn-social btn-facebook">
-                            <i class="fab fa-facebook-f"></i> Facebook
-                        </button>
-                    </div>
-                </div> -->
             </form>
 
             <div class="auth-footer">
@@ -160,30 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     </div>
 
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <div class="logo">
-                    <img src="assets/logo_without_bg.png" alt="LiveRW Logo" class="logo-image">
-                </div>
-                <p class="footer-tagline">Watch sports matches and highlights online in HD quality</p>
-            </div>
-
-            <div class="footer-nav">
-                <nav class="footer-links">
-                    <a href="#">About Us</a>
-                    <a href="#">Terms Of Use</a>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">FAQ</a>
-                    <a href="#">Contact Us</a>
-                    <a href="https://x.com/livedotrw">X (Twitter)</a>
-                    <a href="https://www.instagram.com/livedotrw">Instagram</a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; <?php echo date('Y'); ?> LiveRW. All rights reserved.</p>
-        </div>
+        <!-- Footer content -->
+        <?php require_once 'views/footer.php'; ?>
     </footer>
 
     <script src="script.js"></script>

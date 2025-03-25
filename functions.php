@@ -284,3 +284,282 @@ function getRelatedContent($db, $eventId = null, $sportId = null, $limit = 5)
 
     return $relatedContent;
 }
+
+/**
+ * Device Limit Implementation
+ * 
+ */
+
+/**
+ * Generate a unique device identifier based on user agent, IP, and other factors
+ * Note: For improved security in production, consider using a more robust fingerprinting library
+ * 
+ * @return string Unique device identifier
+ */
+function generateDeviceIdentifier()
+{
+    // Create a hash from user agent, IP, and an additional salt
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $salt = 'LiveRW_device_identifier_salt'; // Change this in production
+
+    return hash('sha256', $userAgent . $ip . $salt);
+}
+
+/**
+ * Get device name from user agent
+ * 
+ * @param string $userAgent The user agent string
+ * @return string Formatted device name
+ */
+function getDeviceName($userAgent)
+{
+    $deviceName = 'Unknown Device';
+
+    // Simple detection of common devices and browsers
+    if (strpos($userAgent, 'iPhone') !== false) {
+        $deviceName = 'iPhone';
+    } elseif (strpos($userAgent, 'iPad') !== false) {
+        $deviceName = 'iPad';
+    } elseif (strpos($userAgent, 'Android') !== false) {
+        if (strpos($userAgent, 'Mobile') !== false) {
+            $deviceName = 'Android Phone';
+        } else {
+            $deviceName = 'Android Tablet';
+        }
+    } elseif (strpos($userAgent, 'Windows') !== false) {
+        $deviceName = 'Windows PC';
+    } elseif (strpos($userAgent, 'Macintosh') !== false) {
+        $deviceName = 'Mac';
+    } elseif (strpos($userAgent, 'Linux') !== false) {
+        $deviceName = 'Linux PC';
+    }
+
+    // Add browser info
+    if (strpos($userAgent, 'Chrome') !== false && strpos($userAgent, 'Edg') === false) {
+        $deviceName .= ' - Chrome';
+    } elseif (strpos($userAgent, 'Firefox') !== false) {
+        $deviceName .= ' - Firefox';
+    } elseif (strpos($userAgent, 'Safari') !== false && strpos($userAgent, 'Chrome') === false) {
+        $deviceName .= ' - Safari';
+    } elseif (strpos($userAgent, 'Edg') !== false) {
+        $deviceName .= ' - Edge';
+    }
+
+    return $deviceName;
+}
+
+/**
+ * Check if user has reached the device limit
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @param int $maxDevices Maximum number of devices allowed (default: 3)
+ * @return bool True if limit reached, false otherwise
+ */
+function hasReachedDeviceLimit($db, $userId, $maxDevices = 3)
+{
+    $query = "SELECT COUNT(*) as device_count FROM user_devices 
+              WHERE user_id = ? AND is_active = 1";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+
+    return $row['device_count'] >= $maxDevices;
+}
+
+/**
+ * Get user's active devices
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @return array Array of active devices
+ */
+function getUserActiveDevices($db, $userId)
+{
+    $query = "SELECT id, device_name, last_login, last_active, ip_address 
+              FROM user_devices 
+              WHERE user_id = ? AND is_active = 1 
+              ORDER BY last_active DESC";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    $devices = [];
+    while ($device = mysqli_fetch_assoc($result)) {
+        $devices[] = $device;
+    }
+
+    return $devices;
+}
+
+/**
+ * Register a device login
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @return array Result with success status and message
+ */
+function registerDeviceLogin($db, $userId)
+{
+    $deviceIdentifier = generateDeviceIdentifier();
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    $deviceName = getDeviceName($userAgent);
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $currentTime = date('Y-m-d H:i:s');
+
+    // Check if this device is already registered for this user
+    $query = "SELECT id FROM user_devices 
+              WHERE user_id = ? AND device_identifier = ?";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "is", $userId, $deviceIdentifier);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($result) > 0) {
+        // Device exists, update its last_login and last_active time
+        $deviceRow = mysqli_fetch_assoc($result);
+        $deviceId = $deviceRow['id'];
+
+        $updateQuery = "UPDATE user_devices 
+                        SET last_login = ?, last_active = ?, is_active = 1, ip_address = ? 
+                        WHERE id = ?";
+
+        $updateStmt = mysqli_prepare($db, $updateQuery);
+        mysqli_stmt_bind_param($updateStmt, "sssi", $currentTime, $currentTime, $ipAddress, $deviceId);
+
+        if (mysqli_stmt_execute($updateStmt)) {
+            return ['success' => true, 'message' => 'Device login updated', 'device_id' => $deviceId];
+        } else {
+            return ['success' => false, 'message' => 'Failed to update device login'];
+        }
+    } else {
+        // Check if user has reached device limit
+        if (hasReachedDeviceLimit($db, $userId)) {
+            return ['success' => false, 'message' => 'Maximum device limit reached', 'limit_reached' => true];
+        }
+
+        // New device, insert it
+        $insertQuery = "INSERT INTO user_devices 
+                        (user_id, device_identifier, device_name, last_login, last_active, ip_address, user_agent) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        $insertStmt = mysqli_prepare($db, $insertQuery);
+        mysqli_stmt_bind_param(
+            $insertStmt,
+            "issssss",
+            $userId,
+            $deviceIdentifier,
+            $deviceName,
+            $currentTime,
+            $currentTime,
+            $ipAddress,
+            $userAgent
+        );
+
+        if (mysqli_stmt_execute($insertStmt)) {
+            $deviceId = mysqli_insert_id($db);
+            return ['success' => true, 'message' => 'New device registered', 'device_id' => $deviceId];
+        } else {
+            return ['success' => false, 'message' => 'Failed to register new device'];
+        }
+    }
+}
+
+/**
+ * Deactivate a device
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @param int $deviceId Device ID to deactivate
+ * @return array Result with success status and message
+ */
+function deactivateDevice($db, $userId, $deviceId)
+{
+    // Ensure the user owns this device
+    $query = "UPDATE user_devices 
+              SET is_active = 0 
+              WHERE id = ? AND user_id = ?";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "ii", $deviceId, $userId);
+
+    if (mysqli_stmt_execute($stmt) && mysqli_stmt_affected_rows($stmt) > 0) {
+        return ['success' => true, 'message' => 'Device deactivated successfully'];
+    } else {
+        return ['success' => false, 'message' => 'Failed to deactivate device or device not found'];
+    }
+}
+
+/**
+ * Update device activity timestamp
+ * Should be called periodically while the user is active
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @return bool Success status
+ */
+function updateDeviceActivity($db, $userId)
+{
+    $deviceIdentifier = generateDeviceIdentifier();
+    $currentTime = date('Y-m-d H:i:s');
+
+    $query = "UPDATE user_devices 
+              SET last_active = ? 
+              WHERE user_id = ? AND device_identifier = ?";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "sis", $currentTime, $userId, $deviceIdentifier);
+
+    return mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Deactivate current device on logout
+ * 
+ * @param mysqli $db Database connection
+ * @param int $userId User ID
+ * @return bool Success status
+ */
+function logoutCurrentDevice($db, $userId)
+{
+    $deviceIdentifier = generateDeviceIdentifier();
+
+    $query = "UPDATE user_devices 
+              SET is_active = 0 
+              WHERE user_id = ? AND device_identifier = ?";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "is", $userId, $deviceIdentifier);
+
+    return mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Clean up inactive devices (can be run as a cron job)
+ * This will deactivate devices that haven't been active for a specified period
+ * 
+ * @param mysqli $db Database connection
+ * @param int $inactiveDays Number of days of inactivity before deactivation
+ * @return int Number of deactivated devices
+ */
+function cleanupInactiveDevices($db, $inactiveDays = 30)
+{
+    $cutoffDate = date('Y-m-d H:i:s', strtotime("-$inactiveDays days"));
+
+    $query = "UPDATE user_devices 
+              SET is_active = 0 
+              WHERE last_active < ? AND is_active = 1";
+
+    $stmt = mysqli_prepare($db, $query);
+    mysqli_stmt_bind_param($stmt, "s", $cutoffDate);
+    mysqli_stmt_execute($stmt);
+
+    return mysqli_stmt_affected_rows($stmt);
+}

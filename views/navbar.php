@@ -22,7 +22,6 @@ if (session_status() === PHP_SESSION_NONE) {
         <a href="schedule.php" <?php echo (basename($_SERVER['PHP_SELF']) == 'schedule.php') ? 'class="active"' : ''; ?>>Schedule</a>
         <a href="teams.php" <?php echo (basename($_SERVER['PHP_SELF']) == 'teams.php') ? 'class="active"' : ''; ?>>Teams</a>
         <a href="highlights.php" <?php echo (basename($_SERVER['PHP_SELF']) == 'highlights.php') ? 'class="active"' : ''; ?>>Highlights</a>
-        <a href="premium.php" <?php echo (basename($_SERVER['PHP_SELF']) == 'premium.php') ? 'class="active"' : ''; ?>>Premium</a>
     </div>
 
     <!-- Right section - search and auth -->
@@ -48,12 +47,11 @@ if (session_status() === PHP_SESSION_NONE) {
                             <span class="user-greeting">Hi, <?php echo $_SESSION['user_name']; ?></span>
                         </div>
                         <div class="dropdown-body">
-                            <a href="profile.php" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
+                            <a href="dashboard.php" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
                             <a href="history.php" class="dropdown-item"><i class="fas fa-history"></i> Watch History</a>
                             <a href="favorites.php" class="dropdown-item"><i class="fas fa-heart"></i> Liked</a>
                             <a href="subscription.php" class="dropdown-item"><i class="fas fa-star"></i> Subscription</a>
                             <div class="dropdown-divider"></div>
-                            <a href="settings.php" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
                             <a href="logout.php" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
                         </div>
                     </div>
