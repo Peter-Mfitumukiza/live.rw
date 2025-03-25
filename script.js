@@ -3,10 +3,10 @@ let slideIndex = 1;
 let slideInterval;
 
 // Wait for the DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ------ NAVBAR FUNCTIONALITY ------
     initializeNavbar();
-    
+
     // ------ SLIDESHOW FUNCTIONALITY ------
     initializeSlideshow();
 
@@ -19,53 +19,92 @@ function initializeNavbar() {
     // Mobile menu toggle functionality
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const navItems = document.querySelector('.nav-items');
-    
+
     if (mobileMenuToggle && navItems) {
-        mobileMenuToggle.addEventListener('click', function() {
+        mobileMenuToggle.addEventListener('click', function () {
             navItems.classList.toggle('active');
         });
-        
+
         // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const isClickInsideNav = navItems.contains(event.target);
             const isClickOnToggle = mobileMenuToggle.contains(event.target);
-            
+
             if (navItems.classList.contains('active') && !isClickInsideNav && !isClickOnToggle) {
                 navItems.classList.remove('active');
             }
         });
     }
-    
+
     // Active navigation link handler
     const navLinks = document.querySelectorAll('.nav-items a');
-    
+
     navLinks.forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', function () {
             // Remove active class from all links
             navLinks.forEach(item => {
                 item.classList.remove('active');
             });
-            
+
             // Add active class to clicked link
             this.classList.add('active');
-            
+
             // Close mobile menu after link click
             if (window.innerWidth <= 768) {
                 navItems.classList.remove('active');
             }
         });
     });
-    
+
     // Search input functionality
     const searchInput = document.querySelector('.search-bar input');
-    
+
     if (searchInput) {
-        searchInput.addEventListener('focus', function() {
+        searchInput.addEventListener('focus', function () {
             this.parentElement.classList.add('focused');
         });
-        
-        searchInput.addEventListener('blur', function() {
+
+        searchInput.addEventListener('blur', function () {
             this.parentElement.classList.remove('focused');
+        });
+    }
+
+    // User dropdown functionality
+    const userDropdown = document.querySelector('.user-dropdown');
+    if (userDropdown) {
+        const profileButton = userDropdown.querySelector('.profile-button');
+        const dropdownContent = userDropdown.querySelector('.dropdown-content');
+
+        // Toggle dropdown on click instead of hover
+        profileButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownContent.classList.toggle('show');
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        dropdownContent.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            if (dropdownContent.classList.contains('show') && !userDropdown.contains(e.target)) {
+                dropdownContent.classList.remove('show');
+            }
+        });
+
+        // Ensure links in dropdown work properly
+        const dropdownLinks = dropdownContent.querySelectorAll('a');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                // Don't stop propagation or prevent default here
+                // so the link can do its job
+                // Just close the dropdown after a small delay to make sure the link is followed
+                setTimeout(() => {
+                    dropdownContent.classList.remove('show');
+                }, 100);
+            });
         });
     }
 }
@@ -74,34 +113,34 @@ function initializeNavbar() {
 function initializeSlideshow() {
     // Initialize slideshow
     showSlides(slideIndex);
-    
+
     // Auto slide every 5 seconds
     startSlideInterval();
-    
+
     // Pause auto-sliding when mouse enters the slideshow
     const slideshow = document.querySelector('.slideshow-container');
     if (slideshow) {
-        slideshow.addEventListener('mouseenter', function() {
+        slideshow.addEventListener('mouseenter', function () {
             clearInterval(slideInterval);
         });
-        
-        slideshow.addEventListener('mouseleave', function() {
+
+        slideshow.addEventListener('mouseleave', function () {
             startSlideInterval();
         });
-        
+
         // Handle slide swipe gestures for mobile devices
         let touchStartX = 0;
         let touchEndX = 0;
-        
-        slideshow.addEventListener('touchstart', function(e) {
+
+        slideshow.addEventListener('touchstart', function (e) {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
-        
-        slideshow.addEventListener('touchend', function(e) {
+
+        slideshow.addEventListener('touchend', function (e) {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
         }, { passive: true });
-        
+
         function handleSwipe() {
             // Detect left or right swipe
             if (touchEndX < touchStartX - 50) {
@@ -118,7 +157,7 @@ function initializeSlideshow() {
 // Start automatic slide interval
 function startSlideInterval() {
     clearInterval(slideInterval);
-    slideInterval = setInterval(function() {
+    slideInterval = setInterval(function () {
         changeSlide(1);
     }, 5000);
 }
@@ -138,36 +177,36 @@ function showSlides(n) {
     let i;
     let slides = document.getElementsByClassName("slide");
     let dots = document.getElementsByClassName("dot");
-    
+
     // Check if elements exist
     if (!slides.length || !dots.length) return;
-    
+
     // Reset to first slide if we go past the end
     if (n > slides.length) {
         slideIndex = 1;
     }
-    
+
     // Go to last slide if we go before the first
     if (n < 1) {
         slideIndex = slides.length;
     }
-    
+
     // Hide all slides
     for (i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
         slides[i].classList.remove("active");
     }
-    
+
     // Remove active class from all dots
     for (i = 0; i < dots.length; i++) {
         dots[i].classList.remove("active");
     }
-    
+
     // Show the current slide and activate the current dot
     slides[slideIndex - 1].style.display = "block";
     slides[slideIndex - 1].classList.add("active");
     dots[slideIndex - 1].classList.add("active");
-    
+
     // Reset the auto-slide timer when manually changing slides
     startSlideInterval();
 }
@@ -175,15 +214,15 @@ function showSlides(n) {
 // Initialize reminder buttons
 function initializeReminders() {
     const reminderButtons = document.querySelectorAll('.btn-remind');
-    
+
     if (reminderButtons) {
         reminderButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
+            button.addEventListener('click', function (e) {
                 e.preventDefault();
-                
+
                 const icon = this.querySelector('i');
                 const matchId = this.getAttribute('data-match-id');
-                
+
                 // Toggle icon between filled and outline bell
                 if (icon.classList.contains('far')) {
                     // Set reminder
@@ -196,7 +235,7 @@ function initializeReminders() {
                     icon.classList.add('far');
                     showNotification('Reminder removed.');
                 }
-                
+
                 console.log(`Toggled reminder for match ID: ${matchId}`);
             });
         });
@@ -206,17 +245,17 @@ function initializeReminders() {
 function showNotification(message) {
     // Create notification element if it doesn't exist
     let notification = document.querySelector('.notification-popup');
-    
+
     if (!notification) {
         notification = document.createElement('div');
         notification.className = 'notification-popup';
         document.body.appendChild(notification);
     }
-    
+
     // Set message and show notification
     notification.textContent = message;
     notification.classList.add('show');
-    
+
     // Hide notification after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');

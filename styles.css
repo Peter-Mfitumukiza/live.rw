@@ -166,8 +166,7 @@ body {
     padding: 20px;
     min-height: calc(100vh - 70px); /* Subtract navbar height */
 }
-
-/* Complete rewrite of user dropdown styles */
+/* User Dropdown Styles */
 .user-dropdown {
     position: relative;
     display: inline-block;
@@ -209,9 +208,15 @@ body {
     overflow: hidden;
 }
 
-.user-dropdown:hover .dropdown-content {
+/* Show dropdown only with class */
+.dropdown-content.show {
     display: block;
 }
+
+/* Remove the hover trigger for showing dropdown */
+/* .user-dropdown:hover .dropdown-content {
+    display: none;
+} */
 
 .dropdown-header {
     padding: 15px;
@@ -254,7 +259,7 @@ body {
     margin: 8px 0;
 }
 
-/* Let's add an animation to make it look nicer */
+/* Animation to make it look nicer */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -266,65 +271,8 @@ body {
     }
 }
 
-.dropdown-content {
+.dropdown-content.show {
     animation: fadeInUp 0.2s ease;
-}
-
-/* Responsive styles */
-@media (max-width: 1024px) {
-    .nav-items {
-        gap: 15px;
-    }
-    
-    .search-bar input {
-        width: 160px;
-    }
-}
-
-@media (max-width: 768px) {
-    .navbar {
-        padding: 15px 20px;
-    }
-    
-    .nav-items {
-        display: none;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        flex-direction: column;
-        background-color: #1a1a1a;
-        padding: 20px;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-        z-index: 100;
-    }
-    
-    .nav-items.active {
-        display: flex;
-    }
-    
-    .mobile-menu-toggle {
-        display: block;
-    }
-    
-    .search-bar input {
-        width: 140px;
-    }
-    
-    .auth-buttons {
-        gap: 5px;
-    }
-    
-    .sign-in, .sign-up {
-        padding: 6px 10px;
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 480px) {
-    .search-bar {
-        display: none;
-    }
 }
 
 
